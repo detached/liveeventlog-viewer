@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="LiveLogViewer" Language="1033" Version="1.0.0.0" Manufacturer="Simon Weis" UpgradeCode="48dc066c-97cc-4512-8fa3-52bbe195e075">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of LiveLogViewer is already installed." />
+    <Media Id="1" Cabinet="LiveLogViewer.cab" EmbedCab="yes" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <UIRef Id="WixUI_InstallDir" />
+    
+    <Property Id="MSIUSEREALADMINDETECTION" Value="1" />
+    <Property Id="HASMSMQ">
+      <RegistrySearch Id="MSMQIsInstalled"
+                      Root="HKLM"
+                      Key="System\CurrentControlSet\Services\MSMQ"
+                      Name="ImagePath"
+                     Type="raw" />
+    </Property>
+    
+    <Property Id="ASSISTANCE_START_VIA_REGISTRY">1</Property>
+
+    <Condition Message="Microsoft MessageQueue is not installed.">
+      <![CDATA[Installed OR HASMSMQ]]>
+    </Condition>
+
+    <CustomAction Id="LaunchApp" Directory="INSTALLFOLDER" ExeCommand="[SystemFolder]cmd.exe /C start LogViewerClient.exe" />
+
+    <InstallExecuteSequence>
+      <Custom Action="LaunchApp" After="InstallFinalize" />
+    </InstallExecuteSequence>
+    
+		<Feature Id="ProductFeature" Title="LogViewerDaemon" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="LiveLogViewer" />
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="Objects" Guid="{31E6497F-9060-41CD-B259-C91DC29C28BA}">
+        <File Id="LogViewerObjects.dll" Name="LogViewerObjects.dll" Source="..\LogViewerDaemon\bin\Release\LogViewerObjects.dll" Vital="yes" KeyPath="no" DiskId="1"/>
+      </Component>
+      <Component Id="Client" Guid="">
+        <File Id="LogViewerClient.exe" Name="LogViewerClient.exe" Source="..\LogViewerClient\bin\Release\LogViewerClient.exe" Vital="yes" KeyPath="no" DiskId="1" />
+        <File Id="LogViewerClient.exe.config" Name="LogViewerClient.exe.config" Source="..\LogViewerClient\bin\Release\LogViewerClient.exe.config" Vital="yes" KeyPath="no" DiskId="1" />
+      </Component>
+			<Component Id="Daemon" Guid="{12BBEB7A-6A64-45CE-966A-F650D42EE75A}">
+        <File Id="sample.conf" Name="sample.conf" Source="..\LogViewerDaemon\bin\Release\sample.conf" Vital="yes" KeyPath="no" DiskId="1" />
+        <File Id="LogViewerDaemon.exe.config" Name="LogViewerDaemon.exe.config" Source="..\LogViewerDaemon\bin\Release\LogViewerDaemon.exe.config" Vital="yes" KeyPath="no" DiskId="1"/>
+				<File Id="LogViewerDaemon.exe" Name="LogViewerDaemon.exe" Source="..\LogViewerDaemon\bin\Release\LogViewerDaemon.exe" Vital="yes" KeyPath="yes" DiskId="1"/>
+				<ServiceInstall
+					Id="ServiceInstaller"
+					Type="ownProcess"
+					Vital="yes"
+					Name="LogViewerDaemon"
+					DisplayName="LiveLogViewer"
+					Description="Piping eventlogs to a message queue."
+					Start="auto"
+					Account="LocalSystem"
+					ErrorControl="ignore"
+					Interactive="no"
+              >
+				</ServiceInstall>
+				<ServiceControl Id="StartService" Start="install" Stop="both" Remove="uninstall" Name="LogViewerDaemon" Wait="yes" />
+			</Component>
+      
+      <!-- Auto-start via Registry -->
+      <Component Id="LiveLogViewerClientAutostart" Guid="{B3479949-9F2B-45BC-9A52-E3AF3BA394C9}">
+        <RegistryValue Id="LogViewerClient.exe" Root="HKCU" Action="write"
+                       Key="Software\Microsoft\Windows\CurrentVersion\Run"
+                       Name="LiveLogViewer Client"
+                       Value="[INSTALLFOLDER]LogViewerClient.exe"
+                       Type="string" />
+        <Condition>ASSISTANCE_START_VIA_REGISTRY</Condition>
+      </Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

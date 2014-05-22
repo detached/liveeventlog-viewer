@@ -1,0 +1,23 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="LogViewerDaemon.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Eventlogs" Type="System.String[]" Scope="Application">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;system&lt;/string&gt;
+  &lt;string&gt;security&lt;/string&gt;
+  &lt;string&gt;application&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="FilterScript" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\filter.conf</Value>
+    </Setting>
+    <Setting Name="MessageQueue" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">.\Private$\logViewer</Value>
+    </Setting>
+    <Setting Name="MessageQueuePermissions" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Benutzer</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
